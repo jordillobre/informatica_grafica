@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <meta charset="utf-8">
+
+    <title> Balancin - Jordi Llobregat </title>
+
+    <style type="text/css">
+      canvas {border: 1px solid black;}
+    </style>
+
+    <!-- Gouraud
+    <script id="myVertexShader"
+          type="x-shader/x-vertex">#version 300 es
+
+      uniform   mat4 projectionMatrix;
+      uniform   mat4 modelViewMatrix;
+      uniform   mat3 normalMatrix;
+
+      in vec3 VertexPosition;
+      in vec3 VertexNormal;
+
+      out vec3 colorOut; //flat out vec3 colorOut - -> para el modelo de sombreado plano
+
+      struct LightData {
+        vec3 Position; // Posición en coordenadas del ojo
+        vec3 La;       // Ambiente
+        vec3 Ld;       // Difusa
+        vec3 Ls;       // Especular
+      };
+      uniform LightData Light;
+
+      struct MaterialData {
+        vec3 Ka;       // Ambiente
+        vec3 Kd;       // Difusa
+        vec3 Ks;       // Especular
+        float alpha;   // Brillo
+      };
+      uniform MaterialData Material;
+
+      vec3 phong (vec3 N, vec3 L, vec3 V) {
+
+        vec3  ambient  = Material.Ka * Light.La;
+        vec3  diffuse  = vec3(0.0);
+        vec3  specular = vec3(0.0);
+
+        float NdotL    = dot (N,L);
+
+        if (NdotL > 0.0) {
+          vec3  R       = reflect(-L, N);
+          float RdotV_n = pow(max(0.0, dot(R,V)), Material.alpha);
+
+          diffuse  = NdotL   * (Light.Ld * Material.Kd);
+          specular = RdotV_n * (Light.Ls * Material.Ks);
+        }
+
+        return (ambient + diffuse + specular);
+
+      }
+
+      void main()  {
+
+        vec3 N          = normalize(normalMatrix * VertexNormal);
+        vec4 ecPosition = modelViewMatrix * vec4(VertexPosition,1.0);
+        vec3 ec         = vec3(ecPosition);
+        vec3 L          = normalize(Light.Position - ec);
+        vec3 V          = normalize(-ec);
+
+        colorOut        = phong(N,L,V);
+
+        gl_Position     = projectionMatrix * ecPosition;
+
+      }
+
+    </script>
+
+    <script id="myFragmentShader"
+          type="x-shader/x-fragment">#version 300 es
+
+      precision mediump float;
+
+      in  vec3 colorOut; //flat in vec3 colorOut - -> para el modelo de sombreado plano
+      out vec4 fragmentColor;
+
+
+      void main() {
+
+        fragmentColor = vec4(colorOut,1);
+
+      }
+
+    </script>
+  < -->
+
+    <!-- Phong -->
+    <script id="myVertexShader"
+          type="x-shader/x-vertex">#version 300 es
+
+      uniform   mat4 projectionMatrix;
+      uniform   mat4 modelViewMatrix;
+      uniform   mat3 normalMatrix;
+
+      in vec3 VertexPosition;
+      in vec3 VertexNormal;
+      in vec2 VertexTexcoords;
+
+      out vec3 N, ec;
+      out vec2 texcoords;
+
+      void main()  {
+
+        N          = normalize(normalMatrix * VertexNormal);
+        vec4 ecPosition = modelViewMatrix * vec4(VertexPosition,1.0);
+        ec         = vec3(ecPosition);
+
+        gl_Position     = projectionMatrix * ecPosition;
+        texcoords = VertexTexcoords;
+      }
+
+    </script>
+
+    <script id="myFragmentShader"
+          type="x-shader/x-fragment">#version 300 es
+
+      precision mediump float;
+
+      struct LightData {
+        vec3 Position; // Posición en coordenadas del ojo
+        vec3 La;       // Ambiente
+        vec3 Ld;       // Difusa
+        vec3 Ls;       // Especular
+      };
+      uniform LightData Light;
+
+      struct MaterialData {
+        vec3 Ka;       // Ambiente
+        vec3 Kd;       // Difusa
+        vec3 Ks;       // Especular
+        float alpha;   // Brillo
+      };
+      uniform MaterialData Material;
+
+      uniform vec2 Scale;     // numero de agujeros
+      uniform vec2 Threshold; // para el tamaño de los agujeros
+
+      uniform sampler2D myTexture;
+
+      in vec3 N, ec;
+      in vec2 texcoords;
+      out vec4 fragmentColor;
+
+      vec3 phong (vec3 N, vec3 L, vec3 V) {
+
+        vec3  ambient  = Material.Ka * Light.La;
+        vec3  diffuse  = vec3(0.0);
+        vec3  specular = vec3(0.0);
+
+        float NdotL    = dot (N,L);
+
+        if (NdotL > 0.0) {
+          vec3  R       = reflect(-L, N);
+          float RdotV_n = pow(max(0.0, dot(R,V)), Material.alpha);
+
+          diffuse  = NdotL   * (Light.Ld * Material.Kd);
+          specular = RdotV_n * (Light.Ls * Material.Ks);
+        }
+
+        return (ambient + diffuse + specular);
+
+      }
+
+      struct FogData {
+        float maxDist;
+        float minDist;
+        vec3 color;
+      };
+      FogData Fog;
+
+      void main() {
+        float ss = fract(texcoords.s * Scale.s);
+        float tt = fract(texcoords.t * Scale.t);
+        
+        if ((ss > Threshold.s) && (tt > Threshold.t))
+          discard;
+
+        Fog.minDist = 8.0;
+        Fog.maxDist = 20.0;
+        Fog.color = vec3(0.6, 0.6, 0.6);
+
+        vec3 n = normalize(N);
+        vec3 L = normalize(Light.Position - ec);
+        vec3 V = normalize(-ec);
+
+        float dist = abs (ec.z);
+
+        float density = 0.1;
+        float fogFactor = exp(-pow(density * dist,2.0));
+        
+        fogFactor = clamp (fogFactor, 0.0, 1.0);
+        vec3 phongColor = phong(n,L,V);
+        vec3 myColor = mix (Fog.color, phongColor, fogFactor);
+
+        fragmentColor = texture(myTexture, texcoords) * vec4(myColor, 1.0) * 1.5;   
+
+      }
+
+    </script>
+    <!-- -->
+  </head>
+
+  <body>
+    <button>Bascular</button>
+
+    <br hidden>
+    <strong hidden>Phi: </strong><span hidden id="Phi"></span>
+    <br>
+    <strong hidden>Zeta: </strong><span hidden id="Zeta"></span>
+    <br>
+    <strong hidden>Fovy: </strong><span hidden id="Fovy"></span>
+    <br>
+    <strong hidden>Radius: </strong><span hidden id="Radius"></span>
+    <br>
+
+    <canvas id="myCanvas" width="600" height="600">
+      El Navegador no soporta HTML5
+    </canvas>
+
+    <script src="gl-matrix-min.js"></script>
+    <script src="primitivasGNT.js"></script>
+    <script src="materiales.js"></script>
+    <script src="balancin.js"></script>
+
+  </body>
+
+</html>
