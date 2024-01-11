@@ -1,0 +1,68 @@
+// VARIABLES CONO Y MICKEY	
+	
+		var alturaCono = 4;
+		var conoY = 1.3;
+		var alturaCabeza = alturaCono + conoY + 0.5;
+		var alturaOrejas = alturaCabeza + 0.5;
+		var distanciaOrejas = 0.5;
+        
+    // CONO
+			// Se crean las transformaciones 
+				mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+				mat4.fromScaling(matA, [3, conoY, 3]);
+				mat4.fromTranslation(matB, [0, alturaCono, 0]);
+  
+			//Se aplican las transformaciones 
+				mat4.multiply(modelMatrix, matA, matC);
+				mat4.multiply(modelMatrix, matB, modelMatrix);
+                
+                //Control
+                mat4.fromRotation(matC, outerAngle, [0, 1, 0]);
+				mat4.multiply(modelMatrix, matC, modelMatrix);
+  
+                gl.uniform4f(program.idMyColor, 0, 1 , 0, 1);  //Verde
+                
+				mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+				gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+				//drawWire(exampleCone);
+                setShaderMaterial(Jade);
+				drawSolid(exampleCone);
+				
+			// TAPA DEL CONO
+				// Se crean las transformaciones 
+					mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+					mat4.fromScaling(matA, [3, 1, 3]);
+					mat4.fromTranslation(matB, [0, alturaCono - 0.5, 0]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+  
+                    //Control
+                    mat4.fromRotation(matC, outerAngle, [0, 1, 0]);
+                    mat4.multiply(modelMatrix, matC, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCover);
+					
+			// CILINDRO EN EL CONO
+				// Se crean las transformaciones (solo se cambian los numeros)
+					mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+					mat4.fromScaling(matA, [3, 0.5, 3]);
+					mat4.fromTranslation(matB, [0, alturaCono - 0.5, 0]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+	
+                    //Control
+                    mat4.fromRotation(matC, outerAngle, [0, 1, 0]);
+                    mat4.multiply(modelMatrix, matC, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCylinder);

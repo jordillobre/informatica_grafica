@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <meta charset="utf-8">
+    
+    <title> Mueve la cámara </title>
+    
+    <style type="text/css">
+      canvas {border: 1px solid black;}
+    </style>
+
+    <script id="myVertexShader" 
+          type="x-shader/x-vertex">
+      
+      uniform mat4 projectionMatrix;
+      uniform mat4 modelViewMatrix;
+      
+      attribute vec3 VertexPosition;
+      
+      void main()  {
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(VertexPosition, 1.0);
+      
+      }
+      
+    </script>
+    
+    <script id="myFragmentShader" 
+          type="x-shader/x-fragment">
+      
+      precision mediump float;
+
+      uniform vec4 myColor;
+      
+      void main() {
+
+        gl_FragColor = myColor;
+      
+      }
+      
+    </script>
+
+  </head>
+  
+  <body>
+    <strong>Phi: </strong><span id="Phi"></span>&deg;
+    <br>
+    <strong>Zeta: </strong><span id="Zeta"></span>&deg;
+    <br>
+    <strong>Fovy: </strong><span id="Fovy"></span>&deg;
+    <br>
+    <strong>Radius: </strong><span id="Radius"></span>
+    <br>
+
+    <canvas id="myCanvas" width="600" height="600">
+      El Navegador no soporta HTML5
+    </canvas>
+    
+    <script src="gl-matrix-min.js"></script>
+    <script src="primitivasG.js"></script>
+    <script src="SillasMickey.js"></script>
+
+  </body>
+
+</html>

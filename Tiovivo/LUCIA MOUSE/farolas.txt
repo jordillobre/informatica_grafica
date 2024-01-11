@@ -1,0 +1,105 @@
+//Plano
+  var suelo = -0.25;
+   setShaderMaterial(Yellow_plastic);
+  
+  modelMatrix     = mat4.create();
+  matA = mat4.create(); //escala
+  matB = mat4.create(); //mueve 
+  
+  mat4.fromScaling(matA, [10, 1, 10]);
+  mat4.fromTranslation(matB, [0, suelo , 0]);
+  mat4.multiply(modelMatrix, matA, matB);
+  
+  gl.uniform4f(program.idMyColor, 1, 1 , 1, 1);
+  
+  mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+  gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  drawSolid(examplePlane);
+  
+  
+  // FAROLITAS
+  
+	var posFarolax = 4;
+	var posFarolay = 4;
+	var alturaFarola = 2.5;
+	var distBolaFarola = 0.5;
+	for (var j =0; j<4 ;j++)
+	{
+		if ( j == 0) {posFarolax = 4, posFarolay = 4;}
+		else if ( j == 1) {posFarolax = -4, posFarolay = 4;}
+		else if ( j == 2) {posFarolax = -4, posFarolay = -4;}
+		else {posFarolax = 4, posFarolay = -4;}
+		
+			// Palotes
+				// Se crean las transformaciones (solo se cambian los numeros)
+					mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+					mat4.fromScaling(matA, [0.1, alturaFarola, 0.1]);
+					mat4.fromTranslation(matB, [posFarolax, suelo, -posFarolay]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCylinder);
+			//TapaPalotes
+				// Se crean las transformaciones 
+					mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+					mat4.fromScaling(matA, [0.1, 1, 0.1]);
+					mat4.fromTranslation(matB, [posFarolax, alturaFarola + suelo, -posFarolay]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+  
+                    //Control
+                    mat4.fromRotation(matC, outerAngle, [0, 1, 0]);
+                    mat4.multiply(modelMatrix, matC, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCover);
+			//Palitos
+				// Se crean las transformaciones (solo se cambian los numeros)
+					mat4.fromRotation(matC, -1.57, [0, 0, 1]);
+					mat4.fromScaling(matA, [0.025, 0.025, distBolaFarola]);
+					mat4.fromTranslation(matB, [posFarolax, alturaFarola -0.3, -posFarolay]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCylinder);
+			//Baby palitos
+				// Se crean las transformaciones (solo se cambian los numeros)
+					mat4.fromRotation(matC, -1.57, [1, 0, 0]);
+					mat4.fromScaling(matA, [0.025, 0.2, 0.025]);
+					mat4.fromTranslation(matB, [posFarolax, alturaFarola - 0.5, -posFarolay + distBolaFarola - 0.02]);
+  
+				//Se aplican las transformaciones 
+					mat4.multiply(modelMatrix, matA, matC);
+					mat4.multiply(modelMatrix, matB, modelMatrix);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleCylinder);
+					
+			//Bola
+				// Se crean las transformaciones (solo se cambian los numeros)
+					mat4.fromScaling(matA, [0.3, 0.3, 0.3]);
+					mat4.fromTranslation(matB, [posFarolax, alturaFarola - 0.7, -posFarolay + distBolaFarola - 0.02]);
+  
+				//Se aplican las transformaciones (hay que hacerlo siempre igual)
+					mat4.multiply(modelMatrix, matB, matA);
+                    
+					mat4.multiply(modelViewMatrix, getCameraMatrix(), modelMatrix); 
+					gl.uniformMatrix4fv(program.modelViewMatrixIndex, false, modelViewMatrix);
+  
+					drawSolid(exampleSphere);
